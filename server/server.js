@@ -21,6 +21,7 @@ app.use(express.json());
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/income", incomeRoutes);
 
+
 app.use('/uploads', express.static(path.join(__dirname,'uploads')));
 
 const PORT=process.env.PORT || 5000;
