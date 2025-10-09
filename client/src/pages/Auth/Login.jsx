@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import AuthLayout from '../../components/Layouts/AuthLayout'
 import {useNavigate ,Link} from 'react-router-dom'
 import Input from "../../components/Inputs/Input"
 import { validateEmail } from '../../utils/helper'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
+import { UserContext } from '../../context/UserContext'
 
 
 const Login = () => {
@@ -12,6 +13,8 @@ const Login = () => {
   const [email,setEmail]=useState("");
   const [password,setPassword]=useState("");
   const [error,setError]=useState(null);
+
+  const {updateUser}=useContext(UserContext);
  
   const handleLogin= async (e)=>{
     e.preventDefault();
@@ -23,10 +26,6 @@ const Login = () => {
       setError("Please enter the password");
       return;
     }
-    // if(password.length<=8){
-    //   setError("Password must be atleast 8 characters long");
-    //   return;
-    // }
     setError("");
     
     //API CALLS FOR LOGIN HERE 
@@ -38,6 +37,7 @@ const Login = () => {
       const {token,user}=response.data;
       if(token){
         localStorage.setItem("token",token);
+        updateUser(user);
         navigate("/dashboard");
       }
     } catch(error){
