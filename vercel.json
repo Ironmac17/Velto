@@ -12,16 +12,7 @@
     }
   ],
   "routes": [
-    {
-      "src": "^/api/(.*)$",
-      "dest": "server/api.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "client/dist/index.html"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+    { "src": "^/api/(.*)$", "dest": "server/api.js" },
+    { "src": "/(.*)", "dest": "client/dist/index.html" }
+  ]
 }
