@@ -1,5 +1,4 @@
 export const BASE_URL = import.meta.env.VITE_BASE_URL || ""; 
-axios.post(`${BASE_URL}${API_PATHS.AUTH.LOGIN}`, data);
 export const API_PATHS={
     AUTH:{
         LOGIN:"/api/v1/auth/login",
