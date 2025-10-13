@@ -28,6 +28,7 @@ connectDB();
 app.get("/", (req, res) => {
   res.send("Hello from the API!");
 });
+app.get("/favicon.ico", (req, res) => res.status(204).end());
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/income", incomeRoutes);
