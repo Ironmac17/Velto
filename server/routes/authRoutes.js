@@ -1,34 +1,41 @@
-const express=require("express");
+const express = require("express");
 const { protect } = require("../middleware/authMiddleware");
 const upload = require("../middleware/uploadMiddleware");
+const sharp = require("sharp");
 const {
-    registerUser,
     loginUser,
     getUserInfo,
-} =require("../controllers/authController");
-const sharp = require("sharp");
+    requestOtp,
+    verifyOtp,
+} = require("../controllers/authController");
 
-const router=express.Router();
+const router = express.Router();
 
-router.post("/register", registerUser);
+// OTP registration flow
+router.post("/request-otp", requestOtp);
+router.post("/verify-otp", verifyOtp);
+
+// Login
 router.post("/login", loginUser);
 router.get("/getUser", protect, getUserInfo);
 
-router.post("/upload-image", upload.single('image'), async (req, res) => {
-    try{
-        if(!req.file){
-            return res.status(400).json({ message: "No file uploaded"});
-        }
+
+// Image upload (existing)
+router.post("/upload-image", upload.single("image"), async (req, res) => {
+    try {
+        if(!req.file) return res.status(400).json({ message: "No file uploaded" });
+
         const mimeType = req.file.mimetype;
         let buffer = req.file.buffer;
 
-        const MAX_SIZE = 1 * 1024 * 1024; 
-        if (buffer.length > MAX_SIZE) {
-        buffer = await sharp(buffer)
-            .resize({ width: 800, withoutEnlargement: true }) 
-            .jpeg({ quality: 70 })
-            .toBuffer();
+        const MAX_SIZE = 1 * 1024 * 1024;
+        if(buffer.length > MAX_SIZE){
+            buffer = await sharp(buffer)
+                .resize({ width: 800, withoutEnlargement: true })
+                .jpeg({ quality: 70 })
+                .toBuffer();
         }
+
         const base64Image = buffer.toString("base64");
         const imageUrl = `data:${mimeType};base64,${base64Image}`;
 
