@@ -37,7 +37,9 @@ const SignUp = () => {
       await axiosInstance.post(API_PATHS.AUTH.REQUEST_OTP, { email });
       setStep("verifyOtp");
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Try again.");
+      setError(
+        err.response?.data?.message || "Something went wrong. Try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -75,7 +77,9 @@ const SignUp = () => {
         navigate("/dashboard");
       }
     } catch (err) {
-      setError(err.response?.data?.message || "Something went wrong. Try again.");
+      setError(
+        err.response?.data?.message || "Something went wrong. Try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -104,7 +108,10 @@ const SignUp = () => {
             </button>
             <p className="text-[13px] text-slate-000 mt-3">
               Already have an account?{" "}
-              <Link className="font-medium text-[#895bfc] underline" to="/login">
+              <Link
+                className="font-medium text-[#895bfc] underline"
+                to="/login"
+              >
                 Login
               </Link>
             </p>
@@ -115,7 +122,7 @@ const SignUp = () => {
           <form onSubmit={handleVerifyOtp}>
             <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex flex-col gap-4">
               <Input
                 value={fullName}
                 onChange={({ target }) => setFullName(target.value)}
@@ -131,24 +138,20 @@ const SignUp = () => {
                 type="text"
                 disabled
               />
-              <div className="col-span-2">
-                <Input
-                  value={password}
-                  onChange={({ target }) => setPassword(target.value)}
-                  label="Password"
-                  placeholder="Min 8 characters"
-                  type="password"
-                />
-              </div>
-              <div className="col-span-2">
-                <Input
-                  value={otp}
-                  onChange={({ target }) => setOtp(target.value)}
-                  label="OTP"
-                  placeholder="Enter OTP sent to your email"
-                  type="text"
-                />
-              </div>
+              <Input
+                value={password}
+                onChange={({ target }) => setPassword(target.value)}
+                label="Password"
+                placeholder="Min 8 characters"
+                type="password"
+              />
+              <Input
+                value={otp}
+                onChange={({ target }) => setOtp(target.value)}
+                label="OTP"
+                placeholder="Enter OTP sent to your email"
+                type="text"
+              />
             </div>
 
             {error && <p className="text-red-500 text-[12px] mt-1">{error}</p>}
