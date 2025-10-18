@@ -4,36 +4,48 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const bcrypt = require("bcryptjs");
+const { generateOtpEmail } = require("../utils/emailTemplates");
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 };
 
-
 exports.requestOtp = async (req, res) => {
     try {
-        const { email } = req.body;
-        if (!email) return res.status(400).json({ message: "Email is required" });
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ message: "Email is required" });
 
-        const existingUser = await User.findOne({ email });
-        if (existingUser) return res.status(400).json({ message: "User already exists" });
+    const existingUser = await User.findOne({ email });
+    if (existingUser) return res.status(400).json({ message: "User already exists" });
 
-        const otp = crypto.randomInt(100000, 999999).toString();
+    // Generate OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
 
-        await Otp.create({
-            email,
-            otp,
-            expiresAt: new Date(Date.now() + 5 * 60 * 1000),
-            type: "verify",
-        });
+    // Save OTP in DB
+    await Otp.create({
+        email,
+        otp,
+        expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 min expiry
+        type: "verify",
+    });
 
-        await sendEmail(email, "Your OTP Code", `Your OTP is ${otp}. It expires in 5 minutes.`);
+    // Generate HTML email using the template
+    const htmlTemplate = generateOtpEmail(otp, "verify");
 
-        res.status(200).json({ message: "OTP sent to email" });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ message: "Server error" });
-    }
+    // Send OTP email
+    await sendEmail(
+        email,
+        "Your OTP Code",                      // Subject
+        `Your OTP is ${otp}. It expires in 5 minutes.`, // Plain text fallback
+        htmlTemplate                           // HTML email
+    );
+
+    res.status(200).json({ message: "OTP sent to email" });
+} catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+}
+
 };
 
 
@@ -111,12 +123,22 @@ exports.forgotPassword = async (req, res) => {
 
         await Otp.deleteMany({ email, type: "reset" });
 
+        // Generate new OTP
         const otp = crypto.randomInt(100000, 999999).toString();
-        const expiresAt = new Date(Date.now() + 5 * 60 * 1000); 
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
         await Otp.create({ email, otp, expiresAt, type: "reset" });
 
-        await sendEmail(email, "Password Reset OTP", `Your OTP is ${otp}. It expires in 5 minutes.`);
+        // Generate HTML email template
+        const htmlTemplate = generateOtpEmail(otp, "reset");
+
+        // Send OTP email
+        await sendEmail(
+            email,
+            "Your OTP Code",
+            `Your OTP is ${otp}. It expires in 5 minutes.`,
+            htmlTemplate
+        );
 
         res.status(200).json({ message: "Reset OTP sent to email" });
     } catch (err) {
@@ -125,6 +147,7 @@ exports.forgotPassword = async (req, res) => {
     }
 };
 
+
 exports.resetPassword = async (req, res) => {
     try {
         const { email, otp, newPassword } = req.body;
@@ -132,6 +155,7 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ message: "All fields are required" });
         }
 
+        // Check OTP
         const otpRecord = await Otp.findOne({ email, otp, type: "reset" });
         if (!otpRecord) return res.status(400).json({ message: "Invalid OTP" });
         if (otpRecord.expiresAt < new Date()) {
@@ -139,16 +163,28 @@ exports.resetPassword = async (req, res) => {
             return res.status(400).json({ message: "OTP expired" });
         }
 
+        // Find user
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: "User not found" });
 
+        // Update password
         user.password = newPassword;
         await user.save();
 
+        // Delete the OTP after successful reset
         await Otp.deleteOne({ _id: otpRecord._id });
 
+        // Send HTML confirmation email
+        const htmlTemplate = generateOtpEmail("Your password has been reset successfully!", "reset");
+        await sendEmail(
+            email,
+            "Password Reset Successful",
+            "Your password has been successfully reset.", // plain text fallback
+            htmlTemplate
+        );
+
         res.status(200).json({ message: "Password reset successfully" });
-        
+
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: "Error resetting password", error: err.message });
@@ -180,10 +216,15 @@ exports.resendOtp = async (req, res) => {
 
         await Otp.create({ email, otp, expiresAt, type });
 
+        // Generate HTML email using the template
+        const htmlTemplate = generateOtpEmail(otp, type);
+
+        // Send OTP email
         await sendEmail(
             email,
             type === "reset" ? "Password Reset OTP" : "Verification OTP",
-            `Your new OTP is ${otp}. It expires in 5 minutes.`
+            `Your new OTP is ${otp}. It expires in 5 minutes.`, // plain text fallback
+            htmlTemplate // HTML email
         );
 
         res.status(200).json({ message: "New OTP sent successfully" });
@@ -192,4 +233,3 @@ exports.resendOtp = async (req, res) => {
         res.status(500).json({ message: "Error resending OTP", error: err.message });
     }
 };
-
