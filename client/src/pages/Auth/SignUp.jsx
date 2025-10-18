@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import AuthLayout from "../../components/Layouts/AuthLayout";
 import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/Inputs/Input";
@@ -22,6 +22,20 @@ const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendDisabled, setResendDisabled] = useState(false);
+  const [counter, setCounter] = useState(60);
+
+  // Timer for resend OTP
+  useEffect(() => {
+    let timer;
+    if (resendDisabled && counter > 0) {
+      timer = setInterval(() => setCounter((prev) => prev - 1), 1000);
+    } else if (counter === 0) {
+      setResendDisabled(false);
+      setCounter(60);
+    }
+    return () => clearInterval(timer);
+  }, [resendDisabled, counter]);
 
   // Step 1: Request OTP
   const handleRequestOtp = async (e) => {
@@ -36,6 +50,7 @@ const SignUp = () => {
     try {
       await axiosInstance.post(API_PATHS.AUTH.REQUEST_OTP, { email });
       setStep("verifyOtp");
+      setResendDisabled(true);
     } catch (err) {
       setError(
         err.response?.data?.message || "Something went wrong. Try again."
@@ -82,6 +97,20 @@ const SignUp = () => {
       );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setError("");
+      await axiosInstance.post(API_PATHS.AUTH.RESEND_OTP, {
+        email,
+        type: "verify",
+      });
+      setResendDisabled(true);
+      setCounter(60);
+    } catch (err) {
+      setError(err.response?.data?.message || "Error resending OTP");
     }
   };
 
@@ -158,6 +187,15 @@ const SignUp = () => {
 
             <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? "Verifying..." : "Verify OTP & Sign Up"}
+            </button>
+
+            <button
+              type="button"
+              className="mt-2 text-sm text-[#895bfc] underline"
+              disabled={resendDisabled}
+              onClick={handleResendOtp}
+            >
+              {resendDisabled ? `Resend in ${counter}s` : "Resend OTP"}
             </button>
           </form>
         )}

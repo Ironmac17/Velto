@@ -1,50 +1,48 @@
 import React, { useContext, useState } from 'react'
 import AuthLayout from '../../components/Layouts/AuthLayout'
-import {useNavigate ,Link} from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import Input from "../../components/Inputs/Input"
 import { validateEmail } from '../../utils/helper'
 import axiosInstance from '../../utils/axiosInstance'
 import { API_PATHS } from '../../utils/apiPaths'
 import { UserContext } from '../../context/UserContext'
 
-
 const Login = () => {
-  const navigate=useNavigate();
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  const [error,setError]=useState(null);
+  const navigate = useNavigate();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
 
-  const {updateUser}=useContext(UserContext);
+  const { updateUser } = useContext(UserContext);
  
-  const handleLogin= async (e)=>{
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if(!validateEmail(email)){
+    if (!validateEmail(email)) {
       setError("Please enter a valid email address");
       return;
     }
-    if(!password){
+    if (!password) {
       setError("Please enter the password");
       return;
     }
     setError("");
     
-    //API CALLS FOR LOGIN HERE 
-    try{
-      const response=await axiosInstance.post(API_PATHS.AUTH.LOGIN,{
+    try {
+      const response = await axiosInstance.post(API_PATHS.AUTH.LOGIN, {
         email,
         password,
       });
-      const {token,user}=response.data;
-      if(token){
-        localStorage.setItem("token",token);
+      const { token, user } = response.data;
+      if (token) {
+        localStorage.setItem("token", token);
         updateUser(user);
         navigate("/dashboard");
       }
-    } catch(error){
-      if(error.response && error.response.data.message){
+    } catch (error) {
+      if (error.response && error.response.data.message) {
         setError(error.response.data.message);
-      } else{
-        setError("Something went wrong.Please try again");
+      } else {
+        setError("Something went wrong. Please try again");
       }
     }
   }
@@ -56,22 +54,31 @@ const Login = () => {
         <p className='text-xs text-slate-700 mt-[5px] mb-6'>Please enter your credentials here</p>
 
         <form onSubmit={handleLogin}>
-          <Input value={email} 
-                 onChange={({target})=> setEmail(target.value)}
-                 label="Email"
-                 placeholder="abc@example.com"
-                 type="text"
+          <Input 
+            value={email} 
+            onChange={({ target }) => setEmail(target.value)}
+            label="Email"
+            placeholder="abc@example.com"
+            type="text"
           />
-          <Input value={password} 
-                 onChange={({target})=> setPassword(target.value)}
-                 label="Password"
-                 placeholder="Min 8 characters"
-                 type="password"
+          <Input 
+            value={password} 
+            onChange={({ target }) => setPassword(target.value)}
+            label="Password"
+            placeholder="Min 8 characters"
+            type="password"
           />
+
+          {/* Forgot Password link */}
+          <p className="text-[13px] text-slate-600 mt-1">
+            <Link className="text-[#895bfc] underline" to="/forgot-password">
+              Forgot Password?
+            </Link>
+          </p>
 
           {error && <p className='text-red-500 text-[12px] mt-1'>{error}</p>}
 
-          <button type="submit" className="btn-primary">
+          <button type="submit" className="btn-primary mt-3">
             Login
           </button>
 
