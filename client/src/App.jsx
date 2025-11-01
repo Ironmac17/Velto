@@ -14,31 +14,28 @@ import UserProvider from "./context/UserContext";
 import { Toaster } from "react-hot-toast";
 import LandingPage from "./pages/Dashboard/LandingPage";
 import ProfilePage from './pages/Dashboard/ProfilePage'
+import AuthGuard from "./hooks/AuthGuard"
 
 const App = () => {
   return (
     <UserProvider>
-      <div>
-        <Router>
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/dashboard" element={<Home />} />
-            <Route path="/income" element={<Income />} />
-            <Route path="/expense" element={<Expense />} />
-            <Route path="/profile" element={<ProfilePage />} />
-          </Routes>
-        </Router>
-      </div>
+      <Router>
+        <Routes>
+          {/* Public */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
 
-      <Toaster
-        toastOptions={{
-          className: "",
-          style: { fontSize: "13px" },
-        }}
-      />
+          {/* Protected */}
+          <Route path="/dashboard" element={<AuthGuard><Home /></AuthGuard>} />
+          <Route path="/income" element={<AuthGuard><Income /></AuthGuard>} />
+          <Route path="/expense" element={<AuthGuard><Expense /></AuthGuard>} />
+          <Route path="/profile" element={<AuthGuard><ProfilePage /></AuthGuard>} />
+        </Routes>
+      </Router>
+
+      <Toaster toastOptions={{ style: { fontSize: "13px" } }} />
     </UserProvider>
   );
 };

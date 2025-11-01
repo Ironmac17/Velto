@@ -5,11 +5,10 @@ import { ChevronDown } from "lucide-react";
 
 const DropDownMenu = () => {
   const [open, setOpen] = useState(false);
-  const { setUser } = useContext(UserContext);
+  const { user, clearUser } = useContext(UserContext);
   const navigate = useNavigate();
   const menuRef = useRef();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -21,22 +20,35 @@ const DropDownMenu = () => {
   }, []);
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem("token");
+    clearUser();
     navigate("/");
   };
+
+  const profileImage =
+    user?.profileImageUrl ||
+    "https://api.dicebear.com/7.x/avataaars/svg?seed=purpleUser";
 
   return (
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-1 bg-[#f5f3ff] px-3 py-2 rounded-lg font-medium text-gray-700 hover:bg-[#ece6ff] transition"
+        className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[#f3ecff] transition"
       >
-        Account <ChevronDown size={18} />
+        <img
+          src={profileImage}
+          alt="profile"
+          className="w-9 h-9 rounded-full border-2 border-[#c2a8ff] hover:scale-105 transition-transform duration-200 object-cover"
+        />
+        <ChevronDown
+          size={16}
+          className={`text-white transition-transform duration-300 ${
+            open ? "rotate-180" : "rotate-0"
+          }`}
+        />
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-40 bg-white border rounded-xl shadow-lg overflow-hidden">
+        <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg overflow-hidden z-50">
           <button
             onClick={() => {
               navigate("/dashboard");

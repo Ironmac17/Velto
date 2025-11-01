@@ -1,6 +1,19 @@
-import React from "react";
+import React, { useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
 
 const Hero = () => {
+  const { user } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    if (user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/signup");
+    }
+  };
+
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-violet-50 via-white to-violet-100 py-24 lg:py-32">
       {/* Decorative background glow */}
@@ -27,12 +40,12 @@ const Hero = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center gap-4 justify-center lg:justify-start">
-            <a
-              href="/signup"
+            <button
+              onClick={handleGetStarted}
               className="bg-gradient-to-r from-violet-700 to-violet-500 text-white px-8 py-4 rounded-xl font-semibold shadow-lg shadow-violet-500/30 hover:shadow-violet-500/50 hover:scale-105 transition-all duration-200"
             >
               Get Started Free
-            </a>
+            </button>
             <a
               href="#features"
               className="px-8 py-4 rounded-xl font-semibold border border-gray-200 text-gray-800 hover:bg-gray-100 transition-all duration-200"

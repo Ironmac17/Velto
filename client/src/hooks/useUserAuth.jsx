@@ -1,35 +1,42 @@
-import { useContext, useEffect } from "react"
-import { UserContext } from "../context/UserContext"
-import { useNavigate } from "react-router-dom";
-import axiosInstance from "../utils/axiosInstance"
+import { useContext, useEffect } from "react";
+import { UserContext } from "../context/UserContext";
+import { useNavigate, useLocation } from "react-router-dom";
+import axiosInstance from "../utils/axiosInstance";
 import { API_PATHS } from "../utils/apiPaths";
 
-export const useUserAuth=()=>{
-    const {user,updateUser,clearUser}=useContext(UserContext);
-    const navigate=useNavigate();
+export const useUserAuth = () => {
+  const { user, updateUser, clearUser } = useContext(UserContext);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    useEffect(()=>{
-        if(user) return;
+  useEffect(() => {
+    // Don’t check auth on public routes
+    const publicPaths = ["/", "/login", "/signup", "/forgot-password"];
+    if (publicPaths.includes(location.pathname)) return;
 
-        let isMounted=true;
-        const fetchUserInfo=async ()=>{
-            try{
-                const response=await axiosInstance.get(API_PATHS.AUTH.GET_USER_INFO);
-                if(isMounted && response.data){
-                    updateUser(response.data);
-                }
-            } catch(error){
-                console.error("Failed to fetch user info", error);
-                if(isMounted){
-                    clearUser();
-                    navigate("/login")
-                }
-            }
-        };
-        fetchUserInfo();
+    if (user) return;
 
-        return () =>{
-            isMounted=false;
-        };
-    },[updateUser,clearUser,navigate]);
+    let isMounted = true;
+
+    const fetchUserInfo = async () => {
+      try {
+        const response = await axiosInstance.get(API_PATHS.AUTH.GET_USER_INFO);
+        if (isMounted && response.data) {
+          updateUser(response.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch user info", error);
+        if (isMounted) {
+          clearUser();
+          navigate("/login", { replace: true });
+        }
+      }
+    };
+
+    fetchUserInfo();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, updateUser, clearUser, navigate, location.pathname]);
 };
