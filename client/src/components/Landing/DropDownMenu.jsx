@@ -65,15 +65,7 @@ const DropDownMenu = () => {
           >
             Dashboard
           </button>
-          <button
-            onClick={() => {
-              navigate("/profile");
-              setOpen(false);
-            }}
-            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-[#f5f3ff]"
-          >
-            Profile
-          </button>
+         
           <button
             onClick={handleLogout}
             className="w-full text-left px-4 py-2 text-red-500 hover:bg-red-50"
