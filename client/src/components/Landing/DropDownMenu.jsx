@@ -5,10 +5,11 @@ import { ChevronDown } from "lucide-react";
 
 const DropDownMenu = () => {
   const [open, setOpen] = useState(false);
-  const { user, clearUser } = useContext(UserContext);
+  const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
   const menuRef = useRef();
 
+  // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
@@ -20,22 +21,27 @@ const DropDownMenu = () => {
   }, []);
 
   const handleLogout = () => {
-    clearUser();
+    setUser(null);
+    localStorage.removeItem("token");
     navigate("/");
   };
 
-  const profileImage =
-    user?.profileImageUrl ||
-    "https://api.dicebear.com/7.x/avataaars/svg?seed=purpleUser";
+  // ✅ Fix: use uploaded image from backend or fallback avatar
+  const avatarUrl = user?.profileImageUrl
+    ? user.profileImageUrl.startsWith("http")
+      ? user.profileImageUrl
+      : `${import.meta.env.VITE_BASE_URL}${user.profileImageUrl}`
+    : "https://api.dicebear.com/7.x/avataaars/svg?seed=purpleUser";
 
   return (
     <div className="relative" ref={menuRef}>
+      {/* Profile Button */}
       <button
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-[#f3ecff] transition"
       >
         <img
-          src={profileImage}
+          src={avatarUrl}
           alt="profile"
           className="w-9 h-9 rounded-full border-2 border-[#c2a8ff] hover:scale-105 transition-transform duration-200 object-cover"
         />
@@ -47,8 +53,9 @@ const DropDownMenu = () => {
         />
       </button>
 
+      {/* Dropdown Menu */}
       {open && (
-        <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg overflow-hidden z-50">
+        <div className="absolute right-0 mt-2 w-44 bg-white border rounded-xl shadow-lg overflow-hidden">
           <button
             onClick={() => {
               navigate("/dashboard");

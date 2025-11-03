@@ -4,6 +4,10 @@ import { UserContext } from "../../context/UserContext";
 import { useNavigate } from "react-router-dom";
 import CharAvatar from "../Cards/CharAvatar";
 
+// If you have a BASE_URL config, import it
+// Or just set it here directly for localhost
+const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:8000";
+
 const SideMenu = ({ activeMenu }) => {
   const { user, clearUser } = useContext(UserContext);
   const navigate = useNavigate();
@@ -11,6 +15,7 @@ const SideMenu = ({ activeMenu }) => {
   const handleClick = (item) => {
     if (item.action === "logout") {
       clearUser();
+      localStorage.removeItem("token");
       navigate("/", { replace: true });
       return;
     }
@@ -22,9 +27,12 @@ const SideMenu = ({ activeMenu }) => {
       <div className="flex flex-col items-center justify-center gap-3 mt-3 mb-7">
         {user?.profileImageUrl ? (
           <img
-            src={user.profileImageUrl}
+            src={`${BASE_URL}${user.profileImageUrl}`}
             alt="Profile"
-            className="w-20 h-20 rounded-full object-cover"
+            className="w-20 h-20 rounded-full object-cover border border-gray-200 shadow-sm"
+            onError={(e) => {
+              e.target.src = "/default-avatar.png"; // fallback
+            }}
           />
         ) : (
           <CharAvatar
@@ -43,8 +51,8 @@ const SideMenu = ({ activeMenu }) => {
         <button
           key={`menu_${index}`}
           className={`w-full flex items-center gap-4 text-[15px] ${
-            activeMenu === item.label ? "text-white bg-primary" : ""
-          } py-3 px-6 rounded-lg mb-3`}
+            activeMenu === item.label ? "text-white bg-primary" : "text-gray-700 hover:bg-gray-100"
+          } py-3 px-6 rounded-lg mb-3 transition`}
           onClick={() => handleClick(item)}
         >
           <item.icon className="text-xl" />

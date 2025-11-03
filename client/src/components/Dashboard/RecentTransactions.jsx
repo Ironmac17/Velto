@@ -13,7 +13,7 @@ const RecentTransactions = ({transactions,onSeeMore}) => {
         <div className='mt-6'>
             {transactions?.slice(0,5)?.map((item)=>(
                 <TransactionsInfoCard
-                    key={item.id}
+                    key={item.id || `${item.type}-${item.date}`}
                     title={item.type == 'expense'?item.category:item.source}
                     icon={item.icon}
                     date={moment(item.date).format("DD MMM YYYY")}

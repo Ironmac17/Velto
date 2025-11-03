@@ -10,10 +10,11 @@ export const useUserAuth = () => {
   const location = useLocation();
 
   useEffect(() => {
-    // Don’t check auth on public routes
+    // Skip auth check on public pages
     const publicPaths = ["/", "/login", "/signup", "/forgot-password"];
     if (publicPaths.includes(location.pathname)) return;
 
+    // If user already loaded, skip
     if (user) return;
 
     let isMounted = true;
@@ -39,4 +40,7 @@ export const useUserAuth = () => {
       isMounted = false;
     };
   }, [user, updateUser, clearUser, navigate, location.pathname]);
+
+  // ✅ Return context so ProfilePage and others can use it
+  return { user, updateUser, clearUser };
 };
