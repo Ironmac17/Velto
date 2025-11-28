@@ -65,8 +65,8 @@ const Footer = () => {
         <div>
           <h3 className="font-semibold text-white mb-3">Contact</h3>
           <ul className="space-y-2 text-white/80 text-sm">
-            <li>Email: nimish4agrawal@gmail.com</li>
-            <li>Phone: +91 94130 21456</li>
+            <li>Email: igupta2_be23@thapar.edu</li>
+            <li>Phone: +91 9382983292</li>
             <li>Location: Patiala, IN</li>
           </ul>
         </div>
@@ -75,7 +75,7 @@ const Footer = () => {
       {/* Divider & Signature */}
       <div className="border-t border-white/10 py-3 text-center">
         <p className="text-white/80 text-sm">
-          Built and designed by <span className="font-medium text-white">Nimish Agarwal</span>
+          Built and designed by <span className="font-medium text-white">Ishika Gupta</span>
         </p>
         <p className="text-white/70 text-xs mt-2">
           © {new Date().getFullYear()} Velto. All rights reserved.
